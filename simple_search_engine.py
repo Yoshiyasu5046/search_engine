@@ -48,4 +48,7 @@ def crawl_web(source):
             crawled.append(url)
     return crawled
 
+<<<<<<< HEAD
 print crawl_web("sample_source.html")
+=======
+>>>>>>> 6cf35cd8e6e58bdf50dcedc07e7eaacf573f6eb6
