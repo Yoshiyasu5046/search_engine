@@ -1,8 +1,9 @@
 # This search engine takes the source source url as input and return the urls in the source source as an array.
 
 
-def get_next_target(source):
-    start_link = source.find('href=')
+def get_next_target(url):
+    source = get_page(url)
+    start_link = source.find('<a href=')
     if start_link == -1:
         return None, 0
     start_quote = source.find('"', start_link)
@@ -26,17 +27,72 @@ def get_all_links(source):
         else:
             break
     return links
-    
-def crawl_web(source):
-    tocrawl = [source]
+  
+
+def add_page_to_index(index, url, content):
+    words = content.split()
+    for word in words:
+        add_to_index(index, word, url)
+ 
+
+def add_to_index(index, keyword, url):
+    if keyword in index:
+        index[keyword].append(url)
+    else:
+        index[keyword] = [url]
+
+
+def lookup(index, keyword):
+    if keyword in index:
+        return index[keyword]
+    else:
+        return None
+
+
+def crawl_web(seed): # returns index, graph of inlinks
+    tocrawl = [seed]
     crawled = []
-    url = ""
-    while tocrawl:
-        source = tocrawl.pop()
-        if url not in crawled:
-            union(tocrawl, get_all_links(get_page(source)))
-            crawled.append(url)
-    return crawled
+    graph = {}  # <url>, [list of pages it links to]
+    index = {} 
+    while tocrawl: 
+        page = tocrawl.pop()
+        if page not in crawled:
+            content = get_page(page)
+            add_page_to_index(index, page, content)
+            outlinks = get_all_links(content)
+            graph[page] = outlinks
+            union(tocrawl, outlinks)
+            crawled.append(page)
+    return index, graph
+
+
+
+#the page ranking algorithm.
+
+def compute_ranks(graph):
+    d = 0.8 # damping factor
+    numloops = 10
+    
+    ranks = {}
+    npages = len(graph)
+    for page in graph:
+        ranks[page] = 1.0 / npages
+    
+    for i in range(0, numloops):
+        newranks = {}
+        for page in graph:
+            newrank = (1 - d) / npages
+            
+            #Insert Code Here
+            
+            newranks[page] = newrank
+        ranks = newranks
+    return ranks
+
+
+
+
+
 
 def get_page(url):
     if url == "sample_source.html":
